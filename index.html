@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StreamHub Free</title>
+<style>
+:root{--bg:#0b0d12;--panel:#141821;--panel2:#1b202b;--text:#f5f7fb;--muted:#9da6b5;--accent:#6c8cff;--green:#42d392;--border:#272d39}
+*{box-sizing:border-box}body{margin:0;background:linear-gradient(180deg,#0b0d12,#10141c);color:var(--text);font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif}
+header{padding:28px 5vw 20px;border-bottom:1px solid var(--border);position:sticky;top:0;background:rgba(11,13,18,.94);backdrop-filter:blur(14px);z-index:5}
+.brand{font-size:28px;font-weight:800}.brand span{color:var(--green)}
+.sub{color:var(--muted);margin-top:4px}
+.search{margin-top:20px;display:flex;gap:10px}.search input{flex:1;background:var(--panel);border:1px solid var(--border);color:var(--text);padding:14px 16px;border-radius:12px;font-size:16px}.search button{background:var(--accent);border:0;color:white;border-radius:12px;padding:0 20px;font-weight:700}
+main{padding:28px 5vw 50px;max-width:1400px;margin:auto}.filters{display:flex;flex-wrap:wrap;gap:9px;margin-bottom:26px}.chip{background:var(--panel);color:#dce2ec;border:1px solid var(--border);padding:9px 13px;border-radius:999px;cursor:pointer}.chip.active{background:var(--accent);border-color:var(--accent);color:white}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:16px}.card{background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:17px;min-height:220px;display:flex;flex-direction:column}.poster{height:110px;border-radius:12px;background:linear-gradient(135deg,#242b3a,#151923);display:flex;align-items:center;justify-content:center;font-size:38px;margin-bottom:14px}.title{font-size:18px;font-weight:750}.meta{font-size:13px;color:var(--muted);margin-top:5px}.tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:10px}.tag{font-size:11px;background:#202633;padding:5px 7px;border-radius:7px;color:#cbd3df}.actions{display:flex;gap:8px;margin-top:auto;padding-top:14px}.actions a,.actions button{flex:1;text-align:center;text-decoration:none;border:0;border-radius:9px;padding:9px;background:var(--panel2);color:white;cursor:pointer}.actions a{background:var(--accent)}.actions button.saved{background:#263d33;color:#8ff0bd}
+section{margin-top:34px}.section-title{font-size:21px;font-weight:800;margin-bottom:13px}.empty{color:var(--muted);padding:25px;background:var(--panel);border-radius:12px}
+.notice{margin:20px 0;padding:13px 15px;border:1px solid #2b4d3e;background:#122119;color:#b9f2d1;border-radius:12px;font-size:13px}
+footer{text-align:center;color:var(--muted);font-size:12px;padding:25px}
+@media(max-width:600px){header{padding:20px}.search button{padding:0 14px}main{padding:22px 20px}.grid{grid-template-columns:1fr 1fr}.card{min-height:235px}.poster{height:90px}}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">StreamHub <span>Free</span></div>
+  <div class="sub">Dein kostenloses & legales Streaming-Kontrollzentrum</div>
+  <div class="search">
+    <input id="search" placeholder="Film, Serie oder Genre suchen …">
+    <button onclick="render()">Suchen</button>
+  </div>
+</header>
+
+<main>
+  <div class="notice">🟢 Diese Demo zeigt kostenlose bzw. öffentlich zugängliche Angebote. Verfügbarkeit und Rechte können sich ändern. Nutze nur offizielle Anbieterlinks.</div>
+
+  <div class="filters" id="filters"></div>
+
+  <section>
+    <div class="section-title">🎬 Entdecken</div>
+    <div class="grid" id="grid"></div>
+  </section>
+
+  <section>
+    <div class="section-title">❤️ Deine Watchlist</div>
+    <div id="watchlist" class="grid"></div>
+  </section>
+
+  <section>
+    <div class="section-title">📺 Kostenlose Anbieter</div>
+    <div class="grid" id="providers"></div>
+  </section>
+</main>
+<footer>StreamHub Free · Lokale Demo · Keine illegalen Streams</footer>
+
+<script>
+const items=[
+ {id:1,title:"ARD Mediathek",type:"Mediathek",genre:"Drama",icon:"📺",desc:"Filme, Serien, Tatort und Dokus.",url:"https://www.ardmediathek.de/"},
+ {id:2,title:"ZDF",type:"Mediathek",genre:"Krimi",icon:"🔵",desc:"Serien, Filme, Krimis und Dokumentationen.",url:"https://www.zdf.de/"},
+ {id:3,title:"ARTE",type:"Mediathek",genre:"Doku",icon:"🎭",desc:"Europäische Filme, Kultur und Dokumentationen.",url:"https://www.arte.tv/de/"},
+ {id:4,title:"Joyn Free",type:"Streaming",genre:"Comedy",icon:"🟣",desc:"Kostenlose Serien, Shows und Live-TV.",url:"https://www.joyn.de/"},
+ {id:5,title:"Pluto TV",type:"Streaming",genre:"Action",icon:"🟠",desc:"Kostenlose Live-Kanäle und On-Demand-Inhalte.",url:"https://pluto.tv/de/live-tv"},
+ {id:6,title:"Netzkino",type:"Streaming",genre:"Horror",icon:"🍿",desc:"Kostenlose Filme mit Werbung.",url:"https://www.netzkino.de/"},
+ {id:7,title:"Rakuten TV Free",type:"Streaming",genre:"Action",icon:"🔴",desc:"Kostenlose werbefinanzierte Filme und Kanäle.",url:"https://www.rakuten.tv/de"},
+ {id:8,title:"Plex",type:"Streaming",genre:"Sci-Fi",icon:"🟡",desc:"Kostenlose Filme, Serien und Live-TV.",url:"https://watch.plex.tv/de"},
+ {id:9,title:"DEFA Filmwelt",type:"Klassiker",genre:"Klassiker",icon:"🎞️",desc:"Viele DEFA-Filme über den offiziellen Kanal.",url:"https://www.youtube.com/@DEFAFilmwelt"},
+ {id:10,title:"Crunchyroll",type:"Anime",genre:"Anime",icon:"🍥",desc:"Kostenloser Bereich mit ausgewählten Anime.",url:"https://www.crunchyroll.com/de"},
+ {id:11,title:"3sat",type:"Mediathek",genre:"Doku",icon:"🌍",desc:"Kultur, Wissen, Filme und Dokumentationen.",url:"https://www.3sat.de/"},
+ {id:12,title:"KiKA",type:"Mediathek",genre:"Familie",icon:"🧸",desc:"Kostenlose Kinder- und Familieninhalte.",url:"https://www.kika.de/"}
+];
+const genres=["Alle","Action","Comedy","Drama","Doku","Horror","Krimi","Sci-Fi","Anime","Klassiker","Familie"];
+let selected="Alle";
+function getSaved(){return JSON.parse(localStorage.getItem("streamhub-watchlist")||"[]")}
+function saveSaved(a){localStorage.setItem("streamhub-watchlist",JSON.stringify(a))}
+function toggle(id){let a=getSaved();a=a.includes(id)?a.filter(x=>x!==id):[...a,id];saveSaved(a);render()}
+function filters(){document.getElementById("filters").innerHTML=genres.map(g=>`<button class="chip ${g===selected?"active":""}" onclick="selected='${g}';render()">${g}</button>`).join("")}
+function render(){
+ filters();
+ let q=document.getElementById("search").value.toLowerCase();
+ let list=items.filter(x=>(selected==="Alle"||x.genre===selected)&&(x.title+" "+x.genre+" "+x.desc).toLowerCase().includes(q));
+ document.getElementById("grid").innerHTML=list.length?list.map(card).join(""):`<div class="empty">Keine passenden Treffer gefunden.</div>`;
+ let saved=getSaved().map(id=>items.find(x=>x.id===id)).filter(Boolean);
+ document.getElementById("watchlist").innerHTML=saved.length?saved.map(card).join(""):`<div class="empty">Noch nichts gespeichert. Klicke bei einem Anbieter auf „+ Watchlist“.</div>`;
+ document.getElementById("providers").innerHTML=items.slice(0,8).map(x=>`<div class="card"><div class="poster">${x.icon}</div><div class="title">${x.title}</div><div class="meta">${x.type} · ${x.genre}</div><div class="actions"><a href="${x.url}" target="_blank" rel="noopener">Offizielle Seite</a></div></div>`).join("");
+}
+function card(x){
+ let saved=getSaved().includes(x.id);
+ return `<div class="card"><div class="poster">${x.icon}</div><div class="title">${x.title}</div><div class="meta">${x.type} · ${x.genre}</div><div class="tags"><span class="tag">🆓 kostenloser Bereich</span><span class="tag">🇩🇪 Deutschland</span></div><div class="meta">${x.desc}</div><div class="actions"><a href="${x.url}" target="_blank" rel="noopener">Anbieter öffnen</a><button class="${saved?"saved":""}" onclick="toggle(${x.id})">${saved?"✓ Gespeichert":"+ Watchlist"}</button></div></div>`
+}
+document.getElementById("search").addEventListener("input",render);
+render();
+</script>
+</body>
+</html>
